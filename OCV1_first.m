@@ -16,13 +16,14 @@ x_ub = [1,1*2,1,1*2];
 
 
 % fmincon을 사용하여 최적화 수행
-    options = optimoptions(@fmincon,'MaxIterations',5000,'StepTolerance',1e-15,'ConstraintTolerance', 1e-15, 'OptimalityTolerance', 1e-15);
-
-
-    fhandle_cost = @(x)OCV1_stoichiometry_model_06(x, OCP_n, OCP_p, OCV);
-    [x_id, fval, exitflag, output] = fmincon(fhandle_cost, ...
-        x_guess, [], [], [], [], x_lb, x_ub, [],options);
-
+  
+options = optimoptions(@fmincon,'MaxIterations',5000,'StepTolerance',1e-15,'ConstraintTolerance', 1e-15, 'OptimalityTolerance', 1e-15);
+   
+problem = createOptimProblem('fmincon', 'objective', @(x) OCV1_stoichiometry_model_06(x_id,OCP_n,OCP_p,OCV), ...
+            'x0', x_guess, 'lb', [0,1*0.5,0,1*0.5], 'ub', [1,1*2,1,1*2] , 'options', options);
+        ms = MultiStart('Display', 'iter');
+    
+        [x_id, fval, exitflag, output] = run(ms, problem, 20); 
 
 
 [cost_hat, OCV_hat] = OCV1_stoichiometry_model_06(x_id,OCP_n,OCP_p,OCV);
@@ -108,7 +109,7 @@ w(start_index:end_index) = dvdq1(start_index:end_index);
 plot(OCV(:,1),OCV(:,2).*w,'b-','LineWidth',lw,'MarkerSize',msz); hold on
 
 
-save(w);
+save('ocv1w.mat','w');
 
 
 
