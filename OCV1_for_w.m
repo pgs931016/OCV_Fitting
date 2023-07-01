@@ -1,4 +1,4 @@
-
+clc;clear;close all
 load ('OCV_fit.mat')
 
 x_guess = [0.01,1*1.2,0.9,1];
@@ -19,17 +19,17 @@ load('ocv1w.mat');
 
 % fmincon을 사용하여 최적화 수행
    
-%    options = optimoptions(@fmincon,'MaxIterations',5000,'StepTolerance',1e-15,'ConstraintTolerance', 1e-15, 'OptimalityTolerance', 1e-15);
-% 
-%     fhandle_cost = @(x)OCV_stoichiometry_model_06(x, OCP_n, OCP_p, OCV,w);
-%     [x_id, fval, exitflag, output] = fmincon(fhandle_cost, ...
-%         x_guess, [], [], [], [], x_lb, x_ub, [],options);
+ options = optimoptions(@fmincon,'MaxIterations',5000,'StepTolerance',1e-15,'ConstraintTolerance', 1e-15, 'OptimalityTolerance', 1e-15);
 
-   problem = createOptimProblem('fmincon', 'objective', @(x) OCV_stoichiometry_model_06(x_id,OCP_n,OCP_p,OCV,w), ...
-            'x0', x_guess, 'lb', [0,1*0.5,0,1*0.5], 'ub', [1,1*2,1,1*2] , 'options', options);
-        ms = MultiStart('Display', 'iter');
-    
-        [x_id2, fval2, exitflag2, output2] = run(ms, problem, 20); 
+    fhandle_cost = @(x)OCV_stoichiometry_model_06(x, OCP_n, OCP_p, OCV,w);
+    [x_id, fval, exitflag, output] = fmincon(fhandle_cost, ...
+        x_guess, [], [], [], [], x_lb, x_ub, [],options);
+
+%    problem = createOptimProblem('fmincon', 'objective', @(x) OCV_stoichiometry_model_06(x_id,OCP_n,OCP_p,OCV,w), ...
+%             'x0', x_guess, 'lb', [0,1*0.5,0,1*0.5], 'ub', [1,1*2,1,1*2] , 'options', options);
+%         ms = MultiStart('Display', 'iter');
+%     
+%         [x_id, fval, exitflag, output] = run(ms, problem, 20); 
 
 
 [cost_hat, OCV_hat] = OCV_stoichiometry_model_06(x_id,OCP_n,OCP_p,OCV,w);
@@ -46,23 +46,31 @@ msz = 16;       % MarkerSize
 
 
 
-plot(OCV(:,1),OCV(:,2),'b-','LineWidth',lw,'MarkerSize',msz); hold on
+plot(OCV(:,1),OCV(:,2),'b-','LineWidth',lw,'MarkerSize',msz); hold on;
 plot(OCV(:,1),OCV_hat,'r-','LineWidth',lw,'MarkerSize',msz);
-% plot(OCV(:,1),w(1:100:end),'g-','LineWidth',lw,'MarkerSize',msz);
+
 
 
 pos = get(gcf, 'Position');
 set(gcf, 'Position', [pos(1) pos(2) width*100, height*100]); %<- Set size
 set(gca, 'FontSize', fsz, 'LineWidth', alw); %<- Set properties
-
-legend('FCC data','FCC fit')
+% 
+% legend('FCC data','FCC fit')
 xlabel('SOC');
 ylabel('OCV (V)');
 title('SOC vs. OCV (0.01C)');
 
 
+yyaxis right;
+ax = gca;  % 현재 축 객체 가져오기
+ax.YColor = 'k';  % 검정색으로 설정
+ylabel('Weight')
 
+% plot(OCV(1:100:end,1),(w(1:100:end)),'-g','LineWidth',lw,'MarkerSize',msz);
+plot(OCV(1:50:end,1),w(1:50:end),'-g','LineWidth',lw,'MarkerSize',msz);
+ylim([-1.5 10])
 
+legend('FCC data','FCC fit','Weight')
 
 
 
